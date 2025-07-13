@@ -5,7 +5,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-public class client extends Frame implements Runnable, ActionListener {
+public class server extends Frame implements Runnable, ActionListener {
     TextField textField;
     TextArea textArea;
     Button send;
@@ -14,18 +14,20 @@ public class client extends Frame implements Runnable, ActionListener {
     Socket socket;
     DataInputStream dataInputStream;
     DataOutputStream dataOutputStream;  
-    client(){
+    server(){
            textArea=new TextArea();
            textField=new TextField();
            send=new Button("Send");
 
            send.addActionListener(this);
             try{
-            socket=new Socket("localhost",12000);
+           serverSocket=new ServerSocket(12000);
+           socket = serverSocket.accept();
            dataInputStream= new DataInputStream(socket.getInputStream());
            dataOutputStream= new DataOutputStream(socket.getOutputStream());
            }catch(Exception e){
-                textArea.append("Could not connect to server.\n");
+               
+                textArea.append("Could not connect to client.\n");
             e.printStackTrace();
            }
 
@@ -34,10 +36,10 @@ public class client extends Frame implements Runnable, ActionListener {
            add(send);
            
            chat= new Thread(this);
-           chat.setDaemon(true); // Set as daemon thread
+            chat.setDaemon(true); 
            chat.start();
            setSize(500,500);
-           setTitle("Client Chat");
+           setTitle("Server Chat");
               setVisible(true);
            setLayout(new FlowLayout());
     }
@@ -50,18 +52,18 @@ public class client extends Frame implements Runnable, ActionListener {
            dataOutputStream.writeUTF(msg);
            dataOutputStream.flush();
         }catch(Exception E){
-          
+        
         }
           
         }
         public static void main(String[] args) {
-            new client();
+            new server();
         }
         public void run() {
             while (true) {
                 try {
                     String message = dataInputStream.readUTF();
-                    textArea.append("Server: " + message + "\n");
+                    textArea.append("Client: " + message + "\n");
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
